@@ -53,4 +53,18 @@ public class UserRepository {
         }
         return null; // Not found
     }
+
+    public void unlinkUser(String userId) {
+        String sql = "DELETE FROM user_links WHERE discord_user_id = ?";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, userId);
+            stmt.executeUpdate();
+            System.out.println("Unlinked Discord User " + userId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

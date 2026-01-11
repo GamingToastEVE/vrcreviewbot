@@ -59,6 +59,8 @@ public class Main {
                 Commands.slash("link-vrc", "Link your Discord account to VRChat via Bio verification")
                         .addOption(OptionType.STRING, "username", "Your VRChat Display Name", true),
 
+                Commands.slash("unlink", "Unlink your VRChat account from your Discord account"),
+
                 Commands.slash("list-reviews", "List reviews for a VRChat Group")
                         .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true),
 
@@ -70,7 +72,6 @@ public class Main {
                         .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID?", false),
 
                 // User Context Menu Commands
-                Commands.user("View VRChat Profile"),
                 Commands.user("View User Reviews"),
                 Commands.user("Send me a DM!")
 

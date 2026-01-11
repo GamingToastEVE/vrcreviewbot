@@ -51,12 +51,19 @@ public class SlashCommandHandler extends ListenerAdapter {
                     handleRateGroup(event);
                 } catch (ApiException e) {
                     event.reply("❌ VRChat API Error").setEphemeral(true).queue();
+                    vrcSession.reAuthenticate();
                     e.printStackTrace();
                 }
             }
             case "link-vrc" -> handleLinkVrc(event);
             case "list-reviews" -> listReviews(event);
             case "edit-review" -> handleEditReview(event);
+            case "unlink" -> {
+                event.deferReply(true).queue();
+                String userId = event.getUser().getId();
+                userRepo.unlinkUser(userId);
+                event.getHook().sendMessage("✅ Your VRChat account has been unlinked from your Discord account.").queue();
+            }
             default -> event.reply("Unknown command").setEphemeral(true).queue();
         }
     }
@@ -64,7 +71,6 @@ public class SlashCommandHandler extends ListenerAdapter {
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
         switch (event.getName()) {
-            case "View VRChat Profile" -> handleViewVRChatProfile(event);
             case "View User Reviews" -> handleViewUserReviews(event);
             case "Send me a DM!" -> {
                 event.deferReply(true).queue();
@@ -113,6 +119,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                     });
 
             } catch (Exception e) {
+                vrcSession.reAuthenticate();
                 event.getHook().sendMessage("❌ Database Error: " + e.getMessage()).queue();
                 e.printStackTrace();
             }
@@ -440,68 +447,6 @@ public class SlashCommandHandler extends ListenerAdapter {
 
             } catch (Exception e) {
                 event.getHook().sendMessage("❌ Error updating: " + e.getMessage()).queue();
-                e.printStackTrace();
-            }
-        });
-    }
-
-    // --- Logic for "View VRChat Profile" User Context Menu ---
-    private void handleViewVRChatProfile(UserContextInteractionEvent event) {
-        event.deferReply(true).queue();
-
-        String targetDiscordId = event.getTarget().getId();
-        String targetDiscordName = event.getTarget().getName();
-
-        CompletableFuture.runAsync(() -> {
-            try {
-                // Check if the target user has linked their VRChat account
-                String vrcUserId = userRepo.getVrcUserId(targetDiscordId);
-
-                if (vrcUserId == null) {
-                    event.getHook().sendMessage("❌ **" + targetDiscordName + "** has not linked their VRChat account yet.\n\n" +
-                            "💡 They can link their account using `/link-vrc`.").queue();
-                    return;
-                }
-
-                // Fetch VRChat user info
-                User vrcUser = vrcUsersApi.getUser(vrcUserId);
-
-                if (vrcUser == null) {
-                    event.getHook().sendMessage("❌ Could not fetch VRChat profile for **" + targetDiscordName + "**.").queue();
-                    return;
-                }
-
-                // Build profile message
-                TextDisplay header = TextDisplay.of("# 👤 VRChat Profile");
-                TextDisplay discordInfo = TextDisplay.of("**Discord User:** " + targetDiscordName);
-
-                StringBuilder vrcInfoText = new StringBuilder();
-                vrcInfoText.append("### VRChat Information\n");
-                vrcInfoText.append("**Display Name:** ").append(vrcUser.getDisplayName()).append("\n");
-                vrcInfoText.append("**User ID:** `").append(vrcUser.getId()).append("`");
-
-                if (vrcUser.getBio() != null && !vrcUser.getBio().isEmpty()) {
-                    String bio = vrcUser.getBio().length() > 200 ? vrcUser.getBio().substring(0, 200) + "..." : vrcUser.getBio();
-                    vrcInfoText.append("\n**Bio:** ").append(bio);
-                }
-
-                if (vrcUser.getStatusDescription() != null && !vrcUser.getStatusDescription().isEmpty()) {
-                    vrcInfoText.append("\n**Status:** ").append(vrcUser.getStatusDescription());
-                }
-
-                TextDisplay vrcInfo = TextDisplay.of(vrcInfoText.toString());
-                TextDisplay profileLink = TextDisplay.of("🔗 **Profile Link:** https://vrchat.com/home/user/" + vrcUser.getId());
-                TextDisplay divider = TextDisplay.of("───────────────────────");
-
-                Container container = Container.of(header, divider, discordInfo, vrcInfo, divider, profileLink);
-
-                event.getHook().sendMessage("").setComponents(container).useComponentsV2().queue();
-
-            } catch (ApiException e) {
-                event.getHook().sendMessage("❌ VRChat API Error: Could not fetch profile.").queue();
-                e.printStackTrace();
-            } catch (Exception e) {
-                event.getHook().sendMessage("❌ Error: " + e.getMessage()).queue();
                 e.printStackTrace();
             }
         });
