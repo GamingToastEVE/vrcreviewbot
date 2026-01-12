@@ -70,21 +70,19 @@ public class SlashCommandHandler extends ListenerAdapter {
 
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
-        switch (event.getName()) {
-            case "View User Reviews" -> handleViewUserReviews(event);
-            case "Send me a DM!" -> {
-                event.deferReply(true).queue();
-                event.getUser().openPrivateChannel().queue(privateChannel -> {
-                    privateChannel.sendMessage("Hello! This is a DM from the bot.").queue();
-                    event.getHook().sendMessage("✅ I've sent you a DM! Now you can use the Slash Commands in my DMs!").setEphemeral(true).queue();
-                });
-            }
-            default -> event.reply("Unknown user command").setEphemeral(true).queue();
+        if (event.getName().equals("Send me a DM!")) {
+            event.deferReply(true).queue();
+            event.getUser().openPrivateChannel().queue(privateChannel -> {
+                privateChannel.sendMessage("Hello! This is a DM from the bot.").queue();
+                event.getHook().sendMessage("✅ I've sent you a DM! Now you can use the Slash Commands in my DMs!").setEphemeral(true).queue();
+            });
+        } else {
+            event.reply("Unknown user command").setEphemeral(true).queue();
         }
     }
 
     private void listReviews(SlashCommandInteractionEvent event) {
-        event.deferReply(false).queue();
+        event.deferReply(true).queue();
         String groupId = event.getOption("group_shortcode").getAsString();
         CompletableFuture.runAsync(() -> {
             try {

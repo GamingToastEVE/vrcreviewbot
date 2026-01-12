@@ -4,6 +4,8 @@ import io.github.vrchatapi.api.UsersApi;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.interactions.IntegrationType;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import io.github.cdimascio.dotenv.Dotenv;
@@ -53,27 +55,53 @@ public class Main {
                         .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true)
                         .addOption(OptionType.INTEGER, "rating", "Rating from 1 to 5", true)
                         .addOption(OptionType.STRING, "comment", "Your review comment", true)
-                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID despite you being age verified?", true),
+                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID despite you being age verified?", true)
+                        .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                        .setContexts(
+                                InteractionContextType.GUILD,
+                                InteractionContextType.BOT_DM,
+                                InteractionContextType.PRIVATE_CHANNEL
+                        ),
 
                 // Command: /link-vrc
                 Commands.slash("link-vrc", "Link your Discord account to VRChat via Bio verification")
-                        .addOption(OptionType.STRING, "username", "Your VRChat Display Name", true),
+                        .addOption(OptionType.STRING, "username", "Your VRChat Display Name", true)
+                        .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                        .setContexts(
+                                InteractionContextType.GUILD,
+                                InteractionContextType.BOT_DM,
+                                InteractionContextType.PRIVATE_CHANNEL
+                        ),
 
-                Commands.slash("unlink", "Unlink your VRChat account from your Discord account"),
+                Commands.slash("unlink", "Unlink your VRChat account from your Discord account")
+                         .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                         .setContexts(
+                                 InteractionContextType.GUILD,
+                                 InteractionContextType.BOT_DM,
+                                 InteractionContextType.PRIVATE_CHANNEL
+                         ),
 
                 Commands.slash("list-reviews", "List reviews for a VRChat Group")
-                        .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true),
+                        .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true)
+                        .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                        .setContexts(
+                                InteractionContextType.GUILD,
+                                InteractionContextType.BOT_DM,
+                                InteractionContextType.PRIVATE_CHANNEL
+                        ),
 
                 // Command: /edit-review
                 Commands.slash("edit-review", "Edit your existing review for a VRChat Group")
                         .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true)
                         .addOption(OptionType.INTEGER, "rating", "New rating from 1 to 5", false)
                         .addOption(OptionType.STRING, "comment", "New review comment", false)
-                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID?", false),
-
-                // User Context Menu Commands
-                Commands.user("View User Reviews"),
-                Commands.user("Send me a DM!")
+                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID?", false)
+                        .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                        .setContexts(
+                                InteractionContextType.GUILD,
+                                InteractionContextType.BOT_DM,
+                                InteractionContextType.PRIVATE_CHANNEL
+                        )
 
         ).queue();
 
