@@ -64,20 +64,13 @@ public class SlashCommandHandler extends ListenerAdapter {
                 userRepo.unlinkUser(userId);
                 event.getHook().sendMessage("✅ Your VRChat account has been unlinked from your Discord account.").queue();
             }
+            case "delete-my-data" -> {
+                event.deferReply(true).queue();
+                String userId = event.getUser().getId();
+                userRepo.deleteAllUserData(userId);
+                event.getHook().sendMessage("✅ All your data has been deleted from the database.").queue();
+            }
             default -> event.reply("Unknown command").setEphemeral(true).queue();
-        }
-    }
-
-    @Override
-    public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
-        if (event.getName().equals("Send me a DM!")) {
-            event.deferReply(true).queue();
-            event.getUser().openPrivateChannel().queue(privateChannel -> {
-                privateChannel.sendMessage("Hello! This is a DM from the bot.").queue();
-                event.getHook().sendMessage("✅ I've sent you a DM! Now you can use the Slash Commands in my DMs!").setEphemeral(true).queue();
-            });
-        } else {
-            event.reply("Unknown user command").setEphemeral(true).queue();
         }
     }
 
@@ -159,7 +152,7 @@ public class SlashCommandHandler extends ListenerAdapter {
             "### 📊 Statistics\n" +
             "⭐ **Average rating:** %.1f/5\n" +
             "📝 **Review count:** %d\n" +
-            "🔞 **Asks for DOB:** %d/%d (%.0f%%)",
+            "🔞 **Asks for DOB if verified:** %d/%d (%.0f%%)",
             session.avgRating(),
             session.totalReviews(),
             session.dobYesCount(),
@@ -181,7 +174,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                         > %s
                         
                         📅 **Date:** %s
-                        🔞 **DOB:** %s""",
+                        🔞 **Asked for DOB if verified:** %s""",
             session.currentIndex() + 1,
             session.totalReviews(),
             stars,
@@ -268,7 +261,12 @@ public class SlashCommandHandler extends ListenerAdapter {
         String groupId = event.getOption("group_shortcode").getAsString();
         int rating = event.getOption("rating").getAsInt();
         String comment = event.getOption("comment").getAsString();
-        boolean asksDob = event.getOption("asks_for_dob").getAsBoolean();
+        boolean asksDob;
+        if (event.getOption("asks_for_dob") != null) {
+            asksDob = event.getOption("asks_for_dob").getAsBoolean();   
+        } else {
+            asksDob = false;
+        }
         String userId = event.getUser().getId();
 
         if (userRepo.getVrcUserId(userId) == null) {
@@ -312,7 +310,7 @@ public class SlashCommandHandler extends ListenerAdapter {
                 sb.append("Current Group Rating: ").append(String.format("%.1f", avg)).append(" ⭐\n");
 
                 if (isAgeGated) {
-                    sb.append("⚠️ **Warning:** Users report this group requires ID/DOB verification! 🔞");
+                    sb.append("⚠️ **Warning:** Users report this group requires ID/DOB verification! (if verified)🔞");
                 }
 
                 event.getHook().sendMessage(sb.toString()).queue();

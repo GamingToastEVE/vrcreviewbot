@@ -67,4 +67,21 @@ public class UserRepository {
             e.printStackTrace();
         }
     }
+
+    public void deleteAllUserData(String userId) {
+        String sql = "DELETE FROM user_links WHERE discord_user_id = ?; " +
+                "DELETE FROM group_reviews WHERE discord_user_id = ?;";
+        try (Connection conn = dbManager.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, userId);
+            stmt.setString(2, userId);
+            stmt.executeUpdate();
+            System.out.println("Deleted all data for Discord User " + userId);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+
+        }
+    }
 }

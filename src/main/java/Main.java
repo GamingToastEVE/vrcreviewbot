@@ -55,13 +55,21 @@ public class Main {
                         .addOption(OptionType.STRING, "group_shortcode", "The VRChat Shortcode of the group", true)
                         .addOption(OptionType.INTEGER, "rating", "Rating from 1 to 5", true)
                         .addOption(OptionType.STRING, "comment", "Your review comment", true)
-                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID despite you being age verified?", true)
+                        .addOption(OptionType.BOOLEAN, "asks_for_dob", "Did they ask for your Date of Birth / ID despite you being age verified?", false)
                         .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
                         .setContexts(
                                 InteractionContextType.GUILD,
                                 InteractionContextType.BOT_DM,
                                 InteractionContextType.PRIVATE_CHANNEL
                         ),
+
+                Commands.slash("delete-my-data", "Delete all your data stored by this bot (links and reviews)")
+                         .setIntegrationTypes(IntegrationType.GUILD_INSTALL, IntegrationType.USER_INSTALL)
+                         .setContexts(
+                                 InteractionContextType.GUILD,
+                                 InteractionContextType.BOT_DM,
+                                 InteractionContextType.PRIVATE_CHANNEL
+                         ),
 
                 // Command: /link-vrc
                 Commands.slash("link-vrc", "Link your Discord account to VRChat via Bio verification")
